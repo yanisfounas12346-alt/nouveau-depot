@@ -46,9 +46,19 @@ fun UltraNutritionScreen(
     val timing = NutritionRepository.timing(settings.trainingHour, settings.trainingMinute)
     val dayName = PlanRepository.day(selectedDay).name
 
-    Column(modifier.fillMaxSize()) {
+    Column(
+        modifier = modifier
+            .fillMaxSize()
+            .statusBarsPadding()
+            .padding(top = 10.dp)
+    ) {
         LazyRow(
-            contentPadding = PaddingValues(horizontal = 12.dp, vertical = 10.dp),
+            contentPadding = PaddingValues(
+                start = 16.dp,
+                end = 16.dp,
+                top = 8.dp,
+                bottom = 12.dp
+            ),
             horizontalArrangement = Arrangement.spacedBy(8.dp)
         ) {
             items(PlanRepository.days.indices.toList()) { index ->
@@ -61,6 +71,8 @@ fun UltraNutritionScreen(
                     colors = FilterChipDefaults.filterChipColors(
                         containerColor = WildPanel2,
                         labelColor = MaterialTheme.colorScheme.onSurface,
+                        disabledContainerColor = WildPanel2,
+                        disabledLabelColor = MaterialTheme.colorScheme.onSurface,
                         selectedContainerColor = WildCyan,
                         selectedLabelColor = MaterialTheme.colorScheme.onPrimary
                     ),
@@ -86,7 +98,8 @@ fun UltraNutritionScreen(
                 Text(
                     "Semaine alimentaire",
                     style = MaterialTheme.typography.displaySmall,
-                    fontWeight = FontWeight.Black
+                    fontWeight = FontWeight.Black,
+                    color = MaterialTheme.colorScheme.onBackground
                 )
                 Spacer(Modifier.height(8.dp))
                 Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
@@ -105,7 +118,8 @@ fun UltraNutritionScreen(
                             Text(
                                 dayName,
                                 style = MaterialTheme.typography.headlineSmall,
-                                fontWeight = FontWeight.Black
+                                fontWeight = FontWeight.Black,
+                                color = MaterialTheme.colorScheme.onSurface
                             )
                         }
                         WildTag("MODIFIABLE", WildAmber)
@@ -271,7 +285,8 @@ fun UltraShoppingScreen(
             Text(
                 "Panier de la semaine",
                 style = MaterialTheme.typography.displaySmall,
-                fontWeight = FontWeight.Black
+                fontWeight = FontWeight.Black,
+                color = MaterialTheme.colorScheme.onBackground
             )
             Text(
                 "Synchronisée avec tes 7 journées : si tu changes une recette, les quantités à acheter sont recalculées automatiquement.",
