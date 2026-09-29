@@ -49,7 +49,7 @@ class MainActivity : ComponentActivity() {
             checkSelfPermission(Manifest.permission.POST_NOTIFICATIONS) != PackageManager.PERMISSION_GRANTED
         ) notificationPermission.launch(Manifest.permission.POST_NOTIFICATIONS)
 
-        setContent { Objectif30Theme { Objectif30App(prefs) } }
+        setContent { Objectif30Theme { PremiumApp(prefs) } }
     }
 }
 
