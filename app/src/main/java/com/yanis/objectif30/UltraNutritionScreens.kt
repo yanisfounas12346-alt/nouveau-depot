@@ -3,6 +3,7 @@ package com.yanis.objectif30
 import android.content.Intent
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.*
@@ -25,7 +26,8 @@ data class ShoppingLine(
 @Composable
 fun UltraNutritionScreen(
     settings: UserSettings,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    onPlanChanged: () -> Unit = {}
 ) {
     val context = LocalContext.current
     val prefs = remember { WeeklyNutritionPreferences(context) }
@@ -45,12 +47,31 @@ fun UltraNutritionScreen(
     val dayName = PlanRepository.day(selectedDay).name
 
     Column(modifier.fillMaxSize()) {
-        ScrollableTabRow(selectedTabIndex = selectedDay) {
-            PlanRepository.days.forEachIndexed { index, day ->
-                Tab(
+        LazyRow(
+            contentPadding = PaddingValues(horizontal = 12.dp, vertical = 10.dp),
+            horizontalArrangement = Arrangement.spacedBy(8.dp)
+        ) {
+            items(PlanRepository.days.indices.toList()) { index ->
+                val day = PlanRepository.days[index]
+                FilterChip(
                     selected = selectedDay == index,
                     onClick = { selectedDay = index },
-                    text = { Text(day.name.take(3)) }
+                    label = { Text(day.name) },
+                    shape = RoundedCornerShape(14.dp),
+                    colors = FilterChipDefaults.filterChipColors(
+                        containerColor = WildPanel2,
+                        labelColor = MaterialTheme.colorScheme.onSurface,
+                        selectedContainerColor = WildCyan,
+                        selectedLabelColor = MaterialTheme.colorScheme.onPrimary
+                    ),
+                    border = FilterChipDefaults.filterChipBorder(
+                        enabled = true,
+                        selected = selectedDay == index,
+                        borderColor = WildLine,
+                        selectedBorderColor = WildCyan,
+                        borderWidth = 1.dp,
+                        selectedBorderWidth = 1.dp
+                    )
                 )
             }
         }
@@ -74,11 +95,21 @@ fun UltraNutritionScreen(
                 }
                 Spacer(Modifier.height(12.dp))
                 WildGlassCard(highlighted = true) {
-                    Text(
-                        dayName,
-                        style = MaterialTheme.typography.headlineSmall,
-                        fontWeight = FontWeight.Black
-                    )
+                    Row(
+                        Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.SpaceBetween,
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Column(Modifier.weight(1f)) {
+                            WildEyebrow("Jour sélectionné")
+                            Text(
+                                dayName,
+                                style = MaterialTheme.typography.headlineSmall,
+                                fontWeight = FontWeight.Black
+                            )
+                        }
+                        WildTag("MODIFIABLE", WildAmber)
+                    }
                     Text(
                         "≈ " + calories + " kcal • " + protein +
                             " g protéines • " + fiber + " g fibres",
@@ -87,7 +118,7 @@ fun UltraNutritionScreen(
                     )
                     Text(
                         WeeklyNutritionRepository.recipeCount().toString() +
-                            " recettes disponibles. Le mode ÉCO réutilise les mêmes bases pour réduire le coût et le gaspillage.",
+                            " recettes disponibles. Chaque changement sur cette journée met automatiquement à jour la liste de courses de toute la semaine.",
                         color = WildMuted,
                         style = MaterialTheme.typography.bodySmall
                     )
@@ -158,6 +189,7 @@ fun UltraNutritionScreen(
                     onClick = {
                         prefs.resetWeek()
                         refresh++
+                        onPlanChanged()
                     },
                     modifier = Modifier.fillMaxWidth()
                 ) {
@@ -184,6 +216,7 @@ fun UltraNutritionScreen(
                                 val index = choices.indexOf(option)
                                 prefs.setChoice(selectedDay, openSlot, index)
                                 refresh++
+                                onPlanChanged()
                                 pickerSlot = null
                             },
                             shape = RoundedCornerShape(16.dp)
@@ -212,14 +245,15 @@ fun UltraNutritionScreen(
 
 @Composable
 fun UltraShoppingScreen(
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    planRevision: Int = 0
 ) {
     val context = LocalContext.current
     val weeklyPrefs = remember { WeeklyNutritionPreferences(context) }
     val checklistPrefs = remember { ShoppingChecklistPreferences(context) }
     var refresh by remember { mutableIntStateOf(0) }
 
-    val lines = remember(refresh) {
+    val lines = remember(refresh, planRevision) {
         aggregateWeekIngredients(
             WeeklyNutritionRepository.weekMeals(weeklyPrefs).flatMap { it.second.ingredients }
         )
@@ -240,7 +274,7 @@ fun UltraShoppingScreen(
                 fontWeight = FontWeight.Black
             )
             Text(
-                "Les 28 repas sont regroupés pour éviter les achats inutiles.",
+                "Synchronisée avec tes 7 journées : si tu changes une recette, les quantités à acheter sont recalculées automatiquement.",
                 color = WildMuted
             )
             Spacer(Modifier.height(12.dp))
