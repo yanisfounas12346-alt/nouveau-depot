@@ -1,6 +1,7 @@
 package com.yanis.objectif30
 
 import android.annotation.SuppressLint
+import android.content.Context
 import android.os.Bundle
 import android.webkit.CookieManager
 import android.webkit.WebChromeClient
@@ -67,6 +68,9 @@ fun WildCartLeclercScreen(
     var products by remember { mutableStateOf<List<LeclercProduct>>(emptyList()) }
     var busy by remember { mutableStateOf(false) }
     var cartMessage by remember { mutableStateOf("") }
+    var showBrowser by remember { mutableStateOf(true) }
+    var checklistRefresh by remember { mutableIntStateOf(0) }
+    val checklist = remember { context.getSharedPreferences("wildsport_leclerc_checklist", Context.MODE_PRIVATE) }
 
     val webView = remember {
         WebView(context).apply {
@@ -215,7 +219,7 @@ fun WildCartLeclercScreen(
                 const out = [];
                 const re = /"iIdProduit"\s*:/g;
                 let mm;
-                while ((mm = re.exec(html)) && out.length < 18) {
+                while ((mm = re.exec(html)) && out.length < 40) {
                   const obj = smallest(html, mm.index);
                   if (!obj) continue;
                   try {
@@ -266,8 +270,9 @@ fun WildCartLeclercScreen(
                         }
                     }
                     products = parsed
+                    showBrowser = false
                     status = "Drive " + payload.optString("storeId") + " • " +
-                        parsed.size + " résultats"
+                        parsed.size + " résultats natifs dans Wildsport"
                 }
             } catch (e: Exception) {
                 status = "Réponse Leclerc illisible : " + (e.message ?: "erreur")
@@ -394,36 +399,69 @@ fun WildCartLeclercScreen(
         }
 
         item {
+            OutlinedButton(
+                onClick = { showBrowser = !showBrowser },
+                modifier = Modifier.fillMaxWidth()
+            ) {
+                Text(if (showBrowser) "Masquer la page E.Leclerc" else "Afficher la page E.Leclerc")
+            }
+        }
+
+        item {
             Card(shape = RoundedCornerShape(20.dp)) {
                 AndroidView(
                     factory = { webView },
                     modifier = Modifier
                         .fillMaxWidth()
-                        .height(560.dp)
+                        .height(if (showBrowser) 430.dp else 1.dp)
                 )
             }
         }
 
         if (ingredients.isNotEmpty()) {
             item {
-                Text("🥦 Ingrédients de tes menus", fontWeight = FontWeight.Bold)
+                Text("🥦 Liste de courses de la semaine", fontWeight = FontWeight.Bold)
                 Text(
-                    "Appuie sur un ingrédient pour le rechercher dans ton Drive.",
+                    "Coche ce que tu as déjà. Utilise Rechercher pour voir les vrais produits E.Leclerc sans perdre ta liste.",
                     style = MaterialTheme.typography.bodySmall
                 )
             }
-            items(ingredients.distinct().take(18)) { ingredient ->
+            items(ingredients.distinct()) { ingredient ->
+                val key = ingredient.lowercase().trim()
+                val checked = checklist.getBoolean(key, false)
                 val normalized = ingredient
-                    .replace(Regex("^\\s*\\d+(?:[.,]\\d+)?\\s*(?:g|kg|ml|l)?\\s*", RegexOption.IGNORE_CASE), "")
+                    .replace(Regex("^\\s*\\d+(?:[.,]\\d+)?\\s*(?:g|kg|ml|cl|l)?\\s*", RegexOption.IGNORE_CASE), "")
+                    .replace(Regex("^\\s*\\d+\\s*[×x]\\s*", RegexOption.IGNORE_CASE), "")
                     .trim()
-                OutlinedButton(
-                    onClick = {
-                        query = normalized.ifBlank { ingredient }
-                        runSearch(query)
-                    },
-                    modifier = Modifier.fillMaxWidth()
-                ) {
-                    Text("🔎 " + ingredient)
+
+                ElevatedCard(shape = RoundedCornerShape(16.dp)) {
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(10.dp),
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Checkbox(
+                            checked = checked,
+                            onCheckedChange = { value ->
+                                checklist.edit().putBoolean(key, value).apply()
+                                checklistRefresh++
+                            }
+                        )
+                        Text(
+                            ingredient,
+                            modifier = Modifier.weight(1f),
+                            fontWeight = if (checked) FontWeight.Normal else FontWeight.SemiBold
+                        )
+                        TextButton(
+                            onClick = {
+                                query = normalized.ifBlank { ingredient }
+                                runSearch(query)
+                            }
+                        ) {
+                            Text("Rechercher")
+                        }
+                    }
                 }
             }
         }
@@ -454,6 +492,20 @@ fun WildCartLeclercScreen(
                 ElevatedCard {
                     Text(cartMessage, modifier = Modifier.padding(16.dp))
                 }
+            }
+        }
+
+        if (products.isNotEmpty()) {
+            item {
+                Text(
+                    "Résultats E.Leclerc • " + products.size,
+                    style = MaterialTheme.typography.titleLarge,
+                    fontWeight = FontWeight.Black
+                )
+                Text(
+                    "Résultats affichés directement dans Wildsport pour éviter de naviguer dans la petite fenêtre du site.",
+                    style = MaterialTheme.typography.bodySmall
+                )
             }
         }
 
