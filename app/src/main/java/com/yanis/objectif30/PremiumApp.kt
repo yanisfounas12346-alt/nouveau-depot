@@ -118,7 +118,7 @@ fun PremiumToday(settings: UserSettings, modifier: Modifier = Modifier) {
     ) {
         item {
             Text(
-                "OBJECTIF 30 • COACH PERSONNEL",
+                "WILDSPORT • COACH PERSONNEL",
                 color = MaterialTheme.colorScheme.primary,
                 fontWeight = FontWeight.Bold
             )
@@ -520,7 +520,7 @@ fun PremiumShopping(settings: UserSettings, modifier: Modifier = Modifier) {
     val ingredientCount = meals.sumOf { it.ingredients.size }
 
     val shoppingText = buildString {
-        appendLine("OBJECTIF 30 — Liste de courses")
+        appendLine("WILDSPORT — Liste de courses")
         appendLine()
         meals.forEach { meal ->
             appendLine(meal.slot.label + " — " + meal.name)
@@ -561,7 +561,7 @@ fun PremiumShopping(settings: UserSettings, modifier: Modifier = Modifier) {
                 onClick = {
                     val send = Intent(Intent.ACTION_SEND).apply {
                         type = "text/plain"
-                        putExtra(Intent.EXTRA_SUBJECT, "Liste de courses Objectif 30")
+                        putExtra(Intent.EXTRA_SUBJECT, "Liste de courses Wildsport")
                         putExtra(Intent.EXTRA_TEXT, shoppingText)
                     }
                     context.startActivity(
@@ -571,6 +571,23 @@ fun PremiumShopping(settings: UserSettings, modifier: Modifier = Modifier) {
                 modifier = Modifier.fillMaxWidth()
             ) {
                 Text("📤 Partager ma liste")
+            }
+        }
+
+        item {
+            Button(
+                onClick = {
+                    val intent = Intent(context, LeclercActivity::class.java).apply {
+                        putStringArrayListExtra(
+                            LeclercActivity.EXTRA_INGREDIENTS,
+                            ArrayList(meals.flatMap { it.ingredients })
+                        )
+                    }
+                    context.startActivity(intent)
+                },
+                modifier = Modifier.fillMaxWidth()
+            ) {
+                Text("⚡ WildCart • connecter E.Leclerc")
             }
         }
 
