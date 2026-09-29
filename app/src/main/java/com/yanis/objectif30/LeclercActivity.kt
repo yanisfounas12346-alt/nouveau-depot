@@ -60,7 +60,7 @@ fun WildCartLeclercScreen(
 ) {
     val context = LocalContext.current
     var currentUrl by remember { mutableStateOf("") }
-    var status by remember { mutableStateOf("Connecte-toi à ton compte E.Leclerc puis sélectionne ton Drive.") }
+    var status by remember { mutableStateOf("Étape 1 : sélectionne ton Drive. Étape 2 : connecte-toi à ton compte E.Leclerc.") }
     var query by remember { mutableStateOf("") }
     var products by remember { mutableStateOf<List<LeclercProduct>>(emptyList()) }
     var busy by remember { mutableStateOf(false) }
@@ -83,15 +83,15 @@ fun WildCartLeclercScreen(
                     status = when {
                         currentUrl.contains("-courses.leclercdrive.fr") &&
                             Regex("magasin-\\d{6}-\\d{6}").containsMatchIn(currentUrl) ->
-                            "✅ Drive détecté. WildCart peut maintenant rechercher et modifier ton panier après confirmation."
+                            "✅ Drive détecté. Tu peux maintenant te connecter à ton compte E.Leclerc dans cette page."
                         currentUrl.contains("leclerc", ignoreCase = true) ->
-                            "Connexion E.Leclerc ouverte. Connecte-toi et choisis ton Drive."
+                            "Choisis d’abord ton Drive (ville/code postal), puis appuie sur Se connecter."
                         else ->
                             "Ouvre E.Leclerc Drive dans cette fenêtre."
                     }
                 }
             }
-            loadUrl("https://www.leclercdrive.fr/")
+            loadUrl("https://www.leclercdrive.fr/mobile/")
         }
     }
 
