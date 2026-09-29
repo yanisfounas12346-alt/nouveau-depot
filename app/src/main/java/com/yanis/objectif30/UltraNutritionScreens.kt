@@ -13,6 +13,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.yanis.objectif30.data.*
+import com.yanis.objectif30.ui.*
 import kotlin.math.roundToInt
 
 data class ShoppingLine(
@@ -60,27 +61,37 @@ fun UltraNutritionScreen(
             verticalArrangement = Arrangement.spacedBy(12.dp)
         ) {
             item {
+                WildEyebrow("Nutrition")
                 Text(
-                    "Nutrition • Semaine",
+                    "Semaine alimentaire",
                     style = MaterialTheme.typography.displaySmall,
                     fontWeight = FontWeight.Black
                 )
-                Text(
-                    WeeklyNutritionRepository.recipeCount().toString() + " recettes disponibles • 28 repas planifiés sur 7 jours",
-                    color = MaterialTheme.colorScheme.primary,
-                    fontWeight = FontWeight.Bold
-                )
-                Spacer(Modifier.height(6.dp))
-                Text(
-                    dayName + " • ≈ " + calories + " kcal • " + protein +
-                        " g protéines • " + fiber + " g fibres",
-                    style = MaterialTheme.typography.titleMedium
-                )
-                Text(
-                    "Mode ÉCO actif : le menu par défaut réutilise les mêmes produits de base sur plusieurs recettes pour limiter le nombre d’achats et le gaspillage. Les valeurs restent des repères pratiques.",
-                    style = MaterialTheme.typography.bodySmall,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant
-                )
+                Spacer(Modifier.height(8.dp))
+                Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                    WildTag("MODE ÉCO", WildGreen)
+                    WildTag("28 REPAS", WildViolet)
+                }
+                Spacer(Modifier.height(12.dp))
+                WildGlassCard(highlighted = true) {
+                    Text(
+                        dayName,
+                        style = MaterialTheme.typography.headlineSmall,
+                        fontWeight = FontWeight.Black
+                    )
+                    Text(
+                        "≈ " + calories + " kcal • " + protein +
+                            " g protéines • " + fiber + " g fibres",
+                        color = WildCyan,
+                        fontWeight = FontWeight.Bold
+                    )
+                    Text(
+                        WeeklyNutritionRepository.recipeCount().toString() +
+                            " recettes disponibles. Le mode ÉCO réutilise les mêmes bases pour réduire le coût et le gaspillage.",
+                        color = WildMuted,
+                        style = MaterialTheme.typography.bodySmall
+                    )
+                }
             }
 
             items(meals) { meal ->
@@ -222,28 +233,42 @@ fun UltraShoppingScreen(
         verticalArrangement = Arrangement.spacedBy(10.dp)
     ) {
         item {
+            WildEyebrow("Budget courses")
             Text(
-                "Courses • Semaine",
+                "Panier de la semaine",
                 style = MaterialTheme.typography.displaySmall,
                 fontWeight = FontWeight.Black
             )
             Text(
-                "Liste générée à partir des 28 repas de ta semaine.",
-                color = MaterialTheme.colorScheme.primary,
-                fontWeight = FontWeight.Bold
+                "Les 28 repas sont regroupés pour éviter les achats inutiles.",
+                color = WildMuted
             )
-            Spacer(Modifier.height(8.dp))
-            LinearProgressIndicator(
-                progress = {
-                    if (lines.isEmpty()) 0f else checkedCount.toFloat() / lines.size.toFloat()
-                },
-                modifier = Modifier.fillMaxWidth()
-            )
-            Spacer(Modifier.height(6.dp))
-            Text(
-                checkedCount.toString() + "/" + lines.size +
-                    " cochés • " + remaining + " à acheter"
-            )
+            Spacer(Modifier.height(12.dp))
+            WildGlassCard(highlighted = true) {
+                Row(
+                    Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Column {
+                        Text(
+                            checkedCount.toString() + "/" + lines.size,
+                            style = MaterialTheme.typography.headlineMedium,
+                            fontWeight = FontWeight.Black
+                        )
+                        Text("articles traités", color = WildMuted)
+                    }
+                    WildTag(remaining.toString() + " RESTANTS", WildAmber)
+                }
+                LinearProgressIndicator(
+                    progress = {
+                        if (lines.isEmpty()) 0f else checkedCount.toFloat() / lines.size.toFloat()
+                    },
+                    modifier = Modifier.fillMaxWidth().height(8.dp),
+                    color = WildCyan,
+                    trackColor = WildLine
+                )
+            }
         }
 
         item {
