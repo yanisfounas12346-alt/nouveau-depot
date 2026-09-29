@@ -461,8 +461,11 @@ private fun aggregateWeekIngredients(rawIngredients: List<String>): List<Shoppin
             else -> acc.amount.roundToInt().toString() + " " + acc.unit + " " + acc.name
         }
 
+        val versionedKey = key + "|" +
+            (if (acc.unit.isNotBlank()) "%.2f".format(acc.amount) else acc.count.toString())
+
         ShoppingLine(
-            key = key,
+            key = versionedKey,
             display = display,
             searchQuery = acc.name
         )
