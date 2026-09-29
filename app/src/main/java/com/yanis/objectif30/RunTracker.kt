@@ -38,7 +38,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.core.content.ContextCompat
 import com.yanis.objectif30.data.RunPreferences
-import com.yanis.objectif30.ui.Objectif30Theme
+import com.yanis.objectif30.ui.*
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import java.util.Locale
@@ -125,112 +125,134 @@ fun RunTrackerScreen(onClose: () -> Unit) {
         val high = state.targetSpeedKmh + 0.6
         "%.1f–%.1f km/h".format(low, high)
     } else {
-        "Calibration automatique"
+        "Calibration auto"
     }
 
-    LazyColumn(
-        modifier = Modifier.fillMaxSize(),
-        contentPadding = PaddingValues(16.dp),
-        verticalArrangement = Arrangement.spacedBy(14.dp)
-    ) {
-        item {
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceBetween,
-                verticalAlignment = Alignment.Top
-            ) {
-                Column {
-                    Text(
-                        "WILDSPORT RUN",
-                        color = MaterialTheme.colorScheme.primary,
-                        fontWeight = FontWeight.Black
-                    )
-                    Text(
-                        if (state.running) "Course en direct" else "Prêt à courir",
-                        style = MaterialTheme.typography.headlineMedium,
-                        fontWeight = FontWeight.Black
-                    )
-                }
-                TextButton(onClick = onClose) { Text("Fermer") }
-            }
-        }
+    val zoneColor = when {
+        state.status.startsWith("Zone cible") -> WildGreen
+        state.status.startsWith("Au-dessus") -> WildAmber
+        state.status.startsWith("Sous") -> WildBlue
+        else -> WildCyan
+    }
 
-        item {
-            ElevatedCard(shape = RoundedCornerShape(24.dp)) {
-                Column(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(20.dp),
-                    horizontalAlignment = Alignment.CenterHorizontally
-                ) {
-                    Text(
-                        "%.1f".format(state.speedKmh),
-                        style = MaterialTheme.typography.displayLarge,
-                        fontWeight = FontWeight.Black,
-                        color = MaterialTheme.colorScheme.primary
-                    )
-                    Text("km/h", style = MaterialTheme.typography.titleMedium)
-                    Spacer(Modifier.height(8.dp))
-                    AssistChip(
-                        onClick = {},
-                        label = { Text("Zone cible : " + zoneText) }
-                    )
-                    Spacer(Modifier.height(6.dp))
-                    Text(state.status, fontWeight = FontWeight.SemiBold)
-                }
-            }
-        }
-
-        item {
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.spacedBy(10.dp)
-            ) {
-                RunMetricCard(
-                    label = "Temps",
-                    value = "%02d:%02d".format(
-                        state.elapsedSeconds / 60,
-                        state.elapsedSeconds % 60
-                    ),
-                    modifier = Modifier.weight(1f)
-                )
-                RunMetricCard(
-                    label = "Distance",
-                    value = "%.2f km".format(state.distanceKm),
-                    modifier = Modifier.weight(1f)
-                )
-            }
-        }
-
-        item {
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.spacedBy(10.dp)
-            ) {
-                RunMetricCard(
-                    label = "Pas",
-                    value = state.steps.toString(),
-                    modifier = Modifier.weight(1f)
-                )
-                RunMetricCard(
-                    label = "GPS",
-                    value = if (state.gpsAccuracyM > 0f) {
-                        "±%.0f m".format(state.gpsAccuracyM)
-                    } else {
-                        "—"
-                    },
-                    modifier = Modifier.weight(1f)
-                )
-            }
-        }
-
-        if (!state.running) {
+    WildBackdrop {
+        LazyColumn(
+            modifier = Modifier.fillMaxSize(),
+            contentPadding = PaddingValues(16.dp, 22.dp, 16.dp, 32.dp),
+            verticalArrangement = Arrangement.spacedBy(16.dp)
+        ) {
             item {
-                ElevatedCard(shape = RoundedCornerShape(20.dp)) {
-                    Column(Modifier.padding(16.dp)) {
-                        Text("Réglage de la séance", fontWeight = FontWeight.Bold)
+                Row(
+                    Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Column {
+                        WildEyebrow("Wildsport Run")
+                        Text(
+                            if (state.running) "Course en direct" else "Prêt à courir",
+                            style = MaterialTheme.typography.displaySmall,
+                            fontWeight = FontWeight.Black
+                        )
+                    }
+                    WildSecondaryButton("Fermer", onClose)
+                }
+            }
+
+            item {
+                WildGlassCard(highlighted = true) {
+                    Column(
+                        Modifier.fillMaxWidth(),
+                        horizontalAlignment = Alignment.CenterHorizontally
+                    ) {
+                        WildTag(
+                            if (state.running) "LIVE GPS" else "PRÊT",
+                            if (state.running) WildGreen else WildCyan
+                        )
+                        Spacer(Modifier.height(4.dp))
+                        Text(
+                            "%.1f".format(state.speedKmh),
+                            style = MaterialTheme.typography.displayLarge,
+                            fontWeight = FontWeight.Black,
+                            color = zoneColor
+                        )
+                        Text(
+                            "km/h",
+                            color = WildMuted,
+                            style = MaterialTheme.typography.titleMedium
+                        )
                         Spacer(Modifier.height(8.dp))
-                        Text("Arrêt automatique : " + targetMinutes + " min")
+                        WildTag("ZONE • " + zoneText, zoneColor)
+                        Text(
+                            state.status,
+                            fontWeight = FontWeight.Bold,
+                            color = zoneColor
+                        )
+                    }
+                }
+            }
+
+            item {
+                Row(
+                    Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.spacedBy(10.dp)
+                ) {
+                    WildMetricTile(
+                        "Temps",
+                        "%02d:%02d".format(
+                            state.elapsedSeconds / 60,
+                            state.elapsedSeconds % 60
+                        ),
+                        accent = WildCyan,
+                        modifier = Modifier.weight(1f)
+                    )
+                    WildMetricTile(
+                        "Distance",
+                        "%.2f km".format(state.distanceKm),
+                        accent = WildBlue,
+                        modifier = Modifier.weight(1f)
+                    )
+                }
+            }
+
+            item {
+                Row(
+                    Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.spacedBy(10.dp)
+                ) {
+                    WildMetricTile(
+                        "Pas",
+                        state.steps.toString(),
+                        accent = WildViolet,
+                        modifier = Modifier.weight(1f)
+                    )
+                    WildMetricTile(
+                        "Précision GPS",
+                        if (state.gpsAccuracyM > 0f) {
+                            "±%.0f m".format(state.gpsAccuracyM)
+                        } else {
+                            "—"
+                        },
+                        accent = if (state.gpsAccuracyM in 1f..20f) WildGreen else WildAmber,
+                        modifier = Modifier.weight(1f)
+                    )
+                }
+            }
+
+            if (!state.running) {
+                item {
+                    WildGlassCard {
+                        WildEyebrow("Réglages")
+                        Text(
+                            "Séance cible",
+                            style = MaterialTheme.typography.titleLarge,
+                            fontWeight = FontWeight.Black
+                        )
+                        Text(
+                            targetMinutes.toString() + " minutes",
+                            color = WildCyan,
+                            fontWeight = FontWeight.Bold
+                        )
                         Slider(
                             value = targetMinutes.toFloat(),
                             onValueChange = { targetMinutes = it.toInt() },
@@ -239,88 +261,72 @@ fun RunTrackerScreen(onClose: () -> Unit) {
                         )
 
                         if (targetSpeed > 0f) {
-                            Text("Vitesse cible personnalisée : %.1f km/h".format(targetSpeed))
+                            Text(
+                                "Vitesse cible • %.1f km/h".format(targetSpeed),
+                                fontWeight = FontWeight.Bold
+                            )
                             Slider(
                                 value = targetSpeed,
                                 onValueChange = { targetSpeed = it },
                                 valueRange = 5f..15f,
                                 steps = 19
                             )
-                            TextButton(
-                                onClick = {
+                            WildSecondaryButton(
+                                "Recalibrer mon allure facile",
+                                {
                                     prefs.resetCalibration()
                                     targetSpeed = 0f
-                                }
-                            ) {
-                                Text("Recalibrer ma vitesse facile")
-                            }
+                                },
+                                Modifier.fillMaxWidth()
+                            )
                         } else {
                             Text(
-                                "Première course : Wildsport calibre ton allure facile pendant environ 5 minutes, puis t'annonce quand tu entres dans ta zone cible.",
-                                style = MaterialTheme.typography.bodyMedium
+                                "La première sortie calibre ton allure facile pendant environ 5 minutes. Ensuite Wildsport te guide vocalement dans ta zone.",
+                                color = WildMuted
                             )
                         }
+                    }
+                }
+
+                item {
+                    WildPrimaryButton(
+                        "▶  Démarrer la course",
+                        { startRun() },
+                        Modifier.fillMaxWidth()
+                    )
+                }
+            } else {
+                item {
+                    Button(
+                        onClick = { stopRun() },
+                        modifier = Modifier.fillMaxWidth().height(56.dp),
+                        shape = RoundedCornerShape(18.dp),
+                        colors = ButtonDefaults.buttonColors(
+                            containerColor = MaterialTheme.colorScheme.error
+                        )
+                    ) {
+                        Text("■  Arrêter la séance", fontWeight = FontWeight.Black)
                     }
                 }
             }
 
             item {
-                Button(
-                    onClick = { startRun() },
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .height(56.dp)
-                ) {
-                    Text("▶ Démarrer la course")
-                }
-            }
-        } else {
-            item {
-                Button(
-                    onClick = { stopRun() },
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .height(56.dp),
-                    colors = ButtonDefaults.buttonColors(
-                        containerColor = MaterialTheme.colorScheme.error
-                    )
-                ) {
-                    Text("■ Arrêter maintenant")
-                }
-            }
-        }
-
-        item {
-            ElevatedCard {
-                Column(Modifier.padding(16.dp)) {
-                    Text("Coaching vocal", fontWeight = FontWeight.Bold)
+                WildGlassCard {
+                    WildEyebrow("Coach vocal")
                     Text(
-                        "Wildsport annonce : « accélère légèrement », « zone cible atteinte », « ralentis légèrement », puis t'indique quand terminer la séance et marcher quelques minutes."
+                        "Wildsport te dit quand accélérer, quand ralentir, quand tu es dans la zone et quand terminer.",
+                        style = MaterialTheme.typography.bodyLarge
                     )
                 }
             }
-        }
 
-        item {
-            Text(
-                "La “zone optimale” désigne ici ta zone cible de course facile personnalisée, pas une limite médicale. Si tu as douleur thoracique, malaise, essoufflement inhabituel ou douleur vive, arrête-toi immédiatement.",
-                style = MaterialTheme.typography.bodySmall,
-                color = MaterialTheme.colorScheme.onSurfaceVariant
-            )
-        }
-    }
-}
-
-@Composable
-private fun RunMetricCard(label: String, value: String, modifier: Modifier = Modifier) {
-    ElevatedCard(modifier = modifier, shape = RoundedCornerShape(18.dp)) {
-        Column(Modifier.padding(14.dp)) {
-            Text(label, style = MaterialTheme.typography.bodySmall)
-            Text(
-                value,
-                style = MaterialTheme.typography.titleLarge,
-                fontWeight = FontWeight.Black
-            )
+            item {
+                Text(
+                    "La zone cible est une allure de course facile personnalisée, pas une limite médicale. Douleur thoracique, malaise, essoufflement inhabituel ou douleur vive : arrête-toi.",
+                    style = MaterialTheme.typography.bodySmall,
+                    color = WildMuted
+                )
+            }
         }
     }
 }
