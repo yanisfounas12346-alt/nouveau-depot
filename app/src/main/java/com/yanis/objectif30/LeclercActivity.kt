@@ -27,6 +27,7 @@ import androidx.compose.ui.viewinterop.AndroidView
 import com.yanis.objectif30.ui.Objectif30Theme
 import org.json.JSONObject
 import org.json.JSONTokener
+import java.net.URLEncoder
 
 data class LeclercProduct(
     val id: String,
@@ -63,6 +64,7 @@ fun WildCartLeclercScreen(
 ) {
     val context = LocalContext.current
     var currentUrl by remember { mutableStateOf("") }
+    var storeBaseUrl by remember { mutableStateOf("") }
     var autoSelectIstresDone by remember { mutableStateOf(false) }
     var status by remember { mutableStateOf("Drive préféré : Istres. Wildsport ouvre directement la page officielle d’Istres.") }
     var query by remember { mutableStateOf("") }
@@ -92,6 +94,11 @@ fun WildCartLeclercScreen(
                 override fun onPageFinished(view: WebView?, url: String?) {
                     currentUrl = url.orEmpty()
                     CookieManager.getInstance().flush()
+
+                    val storeMatch = Regex("(https://[^/]+)/(magasin-\\d{6}-\\d{6})").find(currentUrl)
+                    if (storeMatch != null) {
+                        storeBaseUrl = storeMatch.groupValues[1] + "/" + storeMatch.groupValues[2]
+                    }
 
                     val istresLanding = currentUrl.contains("drive-istres.aspx", ignoreCase = true)
                     if (istresLanding && !autoSelectIstresDone) {
@@ -148,6 +155,28 @@ fun WildCartLeclercScreen(
             JSONTokener(raw).nextValue() as? String ?: raw
         } catch (_: Exception) {
             raw
+        }
+    }
+
+    fun openOfficialSearch(searchText: String, needText: String = searchText) {
+        val clean = searchText.trim()
+        if (clean.isBlank()) return
+
+        query = clean
+        activeNeed = needText
+        products = emptyList()
+        cartMessage = ""
+        status = "Recherche « " + clean + " » dans E.Leclerc Istres…"
+
+        if (storeBaseUrl.isNotBlank()) {
+            val encoded = URLEncoder.encode(clean, "UTF-8")
+            showBrowser = true
+            webView.loadUrl(storeBaseUrl + "/recherche.aspx?TexteRecherche=" + encoded)
+        } else {
+            status = "Wildsport doit d’abord récupérer la session du Drive Istres. La page officielle va s’ouvrir."
+            showBrowser = true
+            autoSelectIstresDone = false
+            webView.loadUrl("https://www.leclercdrive.fr/mobile/region-provence-alpes-cote-dazur/marseille/drive-istres.aspx")
         }
     }
 
@@ -382,8 +411,26 @@ fun WildCartLeclercScreen(
                             color = MaterialTheme.colorScheme.onSurfaceVariant
                         )
                     }
-                    TextButton(onClick = { showBrowser = false }) {
-                        Text("Retour WildCart")
+                    Row {
+                        if (
+                            currentUrl.contains("recherche.aspx", ignoreCase = true) &&
+                            query.isNotBlank()
+                        ) {
+                            TextButton(
+                                onClick = {
+                                    runSearch(
+                                        query,
+                                        activeNeed.ifBlank { query }
+                                    )
+                                },
+                                enabled = !busy
+                            ) {
+                                Text(if (busy) "Analyse…" else "Comparer")
+                            }
+                        }
+                        TextButton(onClick = { showBrowser = false }) {
+                            Text("Retour WildCart")
+                        }
                     }
                 }
             }
@@ -468,7 +515,7 @@ fun WildCartLeclercScreen(
             item {
                 Text("🥦 Liste de courses de la semaine", fontWeight = FontWeight.Bold)
                 Text(
-                    "Coche ce que tu as déjà. Utilise Rechercher pour voir les vrais produits E.Leclerc sans perdre ta liste.",
+                    "Coche ce que tu as déjà. Rechercher ouvre maintenant directement les résultats officiels E.Leclerc en plein écran. Le bouton Comparer analyse ensuite les prix pour WildCart.",
                     style = MaterialTheme.typography.bodySmall
                 )
             }
@@ -501,8 +548,8 @@ fun WildCartLeclercScreen(
                         )
                         TextButton(
                             onClick = {
-                                query = normalized.ifBlank { ingredient }
-                                runSearch(query, ingredient)
+                                val searchTerm = normalized.ifBlank { ingredient }
+                                openOfficialSearch(searchTerm, ingredient)
                             }
                         ) {
                             Text("Rechercher")
@@ -525,11 +572,11 @@ fun WildCartLeclercScreen(
 
         item {
             Button(
-                onClick = { runSearch(query, query) },
+                onClick = { openOfficialSearch(query, query) },
                 enabled = !busy && query.isNotBlank(),
                 modifier = Modifier.fillMaxWidth()
             ) {
-                Text(if (busy) "Recherche…" else "Rechercher les vrais produits")
+                Text("Voir les produits E.Leclerc")
             }
         }
 
