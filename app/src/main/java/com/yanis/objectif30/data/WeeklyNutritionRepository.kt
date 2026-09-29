@@ -3,100 +3,117 @@ package com.yanis.objectif30.data
 import android.content.Context
 
 object WeeklyNutritionRepository {
-    private val extras = listOf(
+    /*
+     * Les recettes "budget" sont volontairement construites autour d'un petit
+     * nombre d'aliments réutilisés toute la semaine. Cela évite d'acheter
+     * 25 ingrédients différents pour une seule portion de chaque recette.
+     */
+    private val budgetRecipes = listOf(
         MealOption(
-            "b4", MealSlot.BREAKFAST, "Shakshuka protéinée",
-            "Œufs mijotés dans tomate, poivron et oignon avec pain complet. Chaud, volumineux et rassasiant.",
-            545, 35, 52, 21, 11, 18, "€",
-            listOf("4 œufs", "250 g tomate concassée", "1 poivron", "1 oignon", "2 tranches pain complet")
+            "eb1", MealSlot.BREAKFAST, "Porridge éco banane",
+            "Avoine chaude au lait, fromage blanc et banane. Très rassasiant pour peu d'ingrédients.",
+            555, 38, 78, 10, 10, 8, "€",
+            listOf("60 g flocons d’avoine", "250 ml lait demi-écrémé", "200 g fromage blanc", "1 banane")
         ),
         MealOption(
-            "b5", MealSlot.BREAKFAST, "Croque dinde œufs",
-            "Pain complet grillé, dinde, œufs et fromage léger avec tomates chaudes.",
-            575, 44, 50, 22, 8, 12, "€€",
-            listOf("3 œufs", "100 g dinde", "3 tranches pain complet", "30 g emmental", "2 tomates")
+            "eb2", MealSlot.BREAKFAST, "Œufs, pommes de terre & légumes",
+            "Petit-déjeuner salé et chaud : œufs, pommes de terre et légumes surgelés.",
+            520, 31, 55, 20, 10, 15, "€",
+            listOf("3 œufs", "250 g pommes de terre", "200 g légumes surgelés")
         ),
         MealOption(
-            "b6", MealSlot.BREAKFAST, "Semoule chaude skyr-banane",
-            "Semoule fine au lait, banane, cannelle et skyr ajouté après cuisson.",
-            565, 36, 84, 9, 8, 8, "€",
-            listOf("70 g semoule fine", "250 ml lait demi-écrémé", "200 g skyr", "1 banane", "cannelle")
-        ),
-
-        MealOption(
-            "l4", MealSlot.LUNCH, "Couscous poulet express",
-            "Poulet, semoule, pois chiches et légumes couscous. Gros volume et beaucoup de fibres.",
-            735, 59, 91, 15, 16, 25, "€",
-            listOf("220 g blanc de poulet", "90 g semoule crue", "120 g pois chiches égouttés", "350 g légumes couscous")
-        ),
-        MealOption(
-            "l5", MealSlot.LUNCH, "Bowl mexicain dinde",
-            "Dinde hachée, riz, haricots rouges, poivrons et salsa tomate.",
-            725, 57, 88, 16, 17, 22, "€",
-            listOf("200 g dinde hachée", "80 g riz cru", "150 g haricots rouges égouttés", "250 g poivrons", "150 g sauce tomate")
-        ),
-        MealOption(
-            "l6", MealSlot.LUNCH, "Pâtes thon tomate épinards",
-            "Pâtes complètes, thon, épinards et sauce tomate. Rapide, économique et riche en protéines.",
-            695, 52, 87, 14, 13, 18, "€",
-            listOf("100 g pâtes complètes crues", "160 g thon au naturel égoutté", "250 g épinards", "200 g sauce tomate")
+            "eb3", MealSlot.BREAKFAST, "Porridge pomme-œufs",
+            "Porridge pomme-cannelle avec deux œufs à côté pour monter les protéines sans multiplier les achats.",
+            565, 39, 72, 15, 11, 10, "€",
+            listOf("60 g flocons d’avoine", "200 g fromage blanc", "1 pomme", "2 œufs")
         ),
 
         MealOption(
-            "s4", MealSlot.SNACK, "Porridge express anti-faim",
-            "Petit porridge chaud avec lait, avoine et skyr. Bon compromis avant une séance tardive.",
-            355, 28, 50, 6, 7, 6, "€",
-            listOf("40 g flocons d’avoine", "150 ml lait demi-écrémé", "180 g skyr", "1 pomme")
+            "el1", MealSlot.LUNCH, "Poulet riz légumes batch",
+            "Poulet, riz et gros volume de légumes surgelés. Préparable en 3 ou 4 portions.",
+            680, 52, 82, 14, 12, 18, "€",
+            listOf("160 g blanc de poulet", "80 g riz cru", "300 g légumes surgelés")
         ),
         MealOption(
-            "s5", MealSlot.SNACK, "Tartines dinde fromage blanc",
-            "Pain complet chaud, dinde et fromage blanc assaisonné avec concombre.",
-            340, 31, 39, 7, 6, 5, "€",
-            listOf("2 tranches pain complet", "80 g dinde", "150 g fromage blanc", "100 g concombre")
+            "el2", MealSlot.LUNCH, "Thon pommes de terre légumes",
+            "Thon au naturel, pommes de terre et légumes. Très simple et sans ingrédient exotique.",
+            640, 46, 70, 13, 12, 16, "€",
+            listOf("140 g thon au naturel égoutté", "300 g pommes de terre", "300 g légumes surgelés")
         ),
         MealOption(
-            "s6", MealSlot.SNACK, "Soupe lentilles œuf",
-            "Bol chaud de soupe de lentilles avec un œuf et une tranche de pain complet.",
-            350, 24, 45, 9, 11, 10, "€",
-            listOf("300 ml soupe de lentilles", "1 œuf", "1 tranche pain complet")
+            "el3", MealSlot.LUNCH, "Poulet pâtes tomate",
+            "Pâtes, poulet, tomate et légumes. Sauce simple et ingrédients réutilisés dans la semaine.",
+            690, 53, 84, 13, 12, 20, "€",
+            listOf("160 g blanc de poulet", "90 g pâtes crues", "200 g tomate concassée", "200 g légumes surgelés")
         ),
 
         MealOption(
-            "d4", MealSlot.DINNER, "Curry de dinde coco léger",
-            "Dinde, riz, légumes et lait de coco léger. Chaud et très réconfortant.",
-            720, 56, 84, 17, 12, 24, "€€",
-            listOf("220 g dinde", "85 g riz cru", "300 g légumes surgelés", "100 ml lait de coco léger", "curry")
+            "es1", MealSlot.SNACK, "Fromage blanc banane avoine",
+            "Collation simple et rassasiante, sans produit premium obligatoire.",
+            335, 26, 49, 4, 6, 2, "€",
+            listOf("250 g fromage blanc", "1 banane", "20 g flocons d’avoine")
         ),
         MealOption(
-            "d5", MealSlot.DINNER, "Hachis parmentier léger",
-            "Bœuf 5 %, purée de pommes de terre et carottes avec salade ou légumes.",
-            710, 55, 73, 20, 12, 30, "€",
-            listOf("200 g bœuf haché 5 %", "400 g pommes de terre", "200 g carottes", "200 g haricots verts")
+            "es2", MealSlot.SNACK, "Fromage blanc pomme avoine",
+            "Même base économique, avec pomme pour varier sans changer toute la liste de courses.",
+            325, 26, 45, 4, 7, 2, "€",
+            listOf("250 g fromage blanc", "1 pomme", "20 g flocons d’avoine")
         ),
         MealOption(
-            "d6", MealSlot.DINNER, "Poulet basquaise & riz",
-            "Poulet mijoté tomate-poivron avec riz. Très simple à préparer en plusieurs portions.",
-            705, 60, 80, 14, 12, 28, "€",
-            listOf("220 g blanc de poulet", "85 g riz cru", "250 g poivrons", "200 g tomate concassée", "1 oignon")
+            "es3", MealSlot.SNACK, "Œufs & tartines",
+            "Deux œufs et pain complet : chaud, salé et très simple quand tu ne veux pas de laitage.",
+            330, 22, 32, 14, 5, 7, "€",
+            listOf("2 œufs", "2 tranches pain complet")
+        ),
+
+        MealOption(
+            "ed1", MealSlot.DINNER, "Lentilles œufs tomate",
+            "Lentilles, œufs, tomate et légumes : protéines + fibres avec un coût bas.",
+            650, 39, 73, 18, 20, 22, "€",
+            listOf("80 g lentilles sèches", "3 œufs", "200 g tomate concassée", "250 g légumes surgelés")
+        ),
+        MealOption(
+            "ed2", MealSlot.DINNER, "Poulet riz légumes soir",
+            "Le même trio économique que le midi, assaisonné différemment pour limiter les achats.",
+            665, 51, 79, 14, 11, 18, "€",
+            listOf("160 g blanc de poulet", "80 g riz cru", "300 g légumes surgelés")
+        ),
+        MealOption(
+            "ed3", MealSlot.DINNER, "Thon pâtes tomate",
+            "Pâtes, thon, tomate et légumes. Rapide, chaud et basé sur les mêmes produits du placard.",
+            655, 47, 79, 12, 12, 18, "€",
+            listOf("140 g thon au naturel égoutté", "90 g pâtes crues", "200 g tomate concassée", "250 g légumes surgelés")
         )
     )
 
-    val options: List<MealOption> = NutritionRepository.options + extras
+    /*
+     * Les anciennes recettes restent disponibles comme alternatives pour la
+     * variété, mais le planning par défaut utilise les recettes budget ci-dessus.
+     */
+    val options: List<MealOption> =
+        budgetRecipes + NutritionRepository.options
 
-    fun forSlot(slot: MealSlot): List<MealOption> = options.filter { it.slot == slot }
+    fun forSlot(slot: MealSlot): List<MealOption> =
+        options.filter { it.slot == slot }
+
+    private val budgetWeekIds = mapOf(
+        MealSlot.BREAKFAST to listOf("eb1", "eb2", "eb1", "eb3", "eb1", "eb2", "eb1"),
+        MealSlot.LUNCH to listOf("el1", "el1", "el2", "el1", "el3", "el2", "el1"),
+        MealSlot.SNACK to listOf("es1", "es2", "es1", "es3", "es1", "es2", "es1"),
+        MealSlot.DINNER to listOf("ed1", "ed2", "ed1", "ed3", "ed2", "ed1", "ed2")
+    )
 
     fun defaultIndex(dayIndex: Int, slot: MealSlot): Int {
-        val size = forSlot(slot).size
-        val offset = when (slot) {
-            MealSlot.BREAKFAST -> 0
-            MealSlot.LUNCH -> 2
-            MealSlot.SNACK -> 4
-            MealSlot.DINNER -> 1
-        }
-        return (dayIndex + offset) % size
+        val list = forSlot(slot)
+        val id = budgetWeekIds.getValue(slot)[dayIndex.coerceIn(0, 6)]
+        return list.indexOfFirst { it.id == id }.coerceAtLeast(0)
     }
 
-    fun selected(dayIndex: Int, slot: MealSlot, prefs: WeeklyNutritionPreferences): MealOption {
+    fun selected(
+        dayIndex: Int,
+        slot: MealSlot,
+        prefs: WeeklyNutritionPreferences
+    ): MealOption {
         val list = forSlot(slot)
         val index = prefs.choice(dayIndex, slot, defaultIndex(dayIndex, slot))
         return list[index.coerceIn(0, list.lastIndex)]
@@ -104,12 +121,17 @@ object WeeklyNutritionRepository {
 
     fun weekMeals(prefs: WeeklyNutritionPreferences): List<Pair<Int, MealOption>> =
         (0..6).flatMap { day ->
-            MealSlot.entries.map { slot -> day to selected(day, slot, prefs) }
+            MealSlot.entries.map { slot ->
+                day to selected(day, slot, prefs)
+            }
         }
+
+    fun recipeCount(): Int = options.size
 }
 
 class WeeklyNutritionPreferences(context: Context) {
-    private val prefs = context.getSharedPreferences("wildsport_weekly_nutrition", Context.MODE_PRIVATE)
+    private val prefs =
+        context.getSharedPreferences("wildsport_weekly_nutrition", Context.MODE_PRIVATE)
 
     fun choice(dayIndex: Int, slot: MealSlot, defaultIndex: Int): Int =
         prefs.getInt("choice_" + dayIndex + "_" + slot.name, defaultIndex)
@@ -124,7 +146,8 @@ class WeeklyNutritionPreferences(context: Context) {
 }
 
 class ShoppingChecklistPreferences(context: Context) {
-    private val prefs = context.getSharedPreferences("wildsport_shopping_checklist", Context.MODE_PRIVATE)
+    private val prefs =
+        context.getSharedPreferences("wildsport_shopping_checklist", Context.MODE_PRIVATE)
 
     fun isChecked(key: String): Boolean = prefs.getBoolean(key, false)
 
