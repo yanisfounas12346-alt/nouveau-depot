@@ -37,6 +37,7 @@ private enum class WildTab(val label: String) {
 fun WildsportUltraApp(prefs: UserPreferences) {
     val settings by prefs.settings.collectAsState(initial = UserSettings())
     var tab by remember { mutableStateOf(WildTab.HOME) }
+    var nutritionRevision by remember { mutableIntStateOf(0) }
     val context = LocalContext.current
     val activity = context as? ComponentActivity
 
@@ -114,7 +115,8 @@ fun WildsportUltraApp(prefs: UserPreferences) {
             ) {
                 UltraNutritionScreen(
                     settings = settings,
-                    modifier = Modifier.fillMaxSize()
+                    modifier = Modifier.fillMaxSize(),
+                    onPlanChanged = { nutritionRevision++ }
                 )
             }
 
@@ -153,7 +155,10 @@ fun WildsportUltraApp(prefs: UserPreferences) {
             WildTab.SHOP -> WildBackdrop(
                 Modifier.padding(bottom = padding.calculateBottomPadding())
             ) {
-                UltraShoppingScreen(Modifier.fillMaxSize())
+                UltraShoppingScreen(
+                    modifier = Modifier.fillMaxSize(),
+                    planRevision = nutritionRevision
+                )
             }
         }
     }
