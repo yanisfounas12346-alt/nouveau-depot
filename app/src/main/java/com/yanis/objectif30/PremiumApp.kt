@@ -56,15 +56,9 @@ fun PremiumApp(prefs: UserPreferences) {
         when (tab) {
             PremiumTab.TODAY -> PremiumToday(settings, Modifier.padding(pad))
             PremiumTab.WEEK -> PremiumWeek(Modifier.padding(pad))
-            PremiumTab.MEALS -> PremiumMeals(
+            PremiumTab.MEALS -> UltraNutritionScreen(
                 settings = settings,
-                modifier = Modifier.padding(pad),
-                onSwap = { slot, index ->
-                    activity?.lifecycleScope?.launch { prefs.setMealChoice(slot, index) }
-                },
-                onTrainingTime = { h, m ->
-                    activity?.lifecycleScope?.launch { prefs.setTrainingTime(h, m) }
-                }
+                modifier = Modifier.padding(pad)
             )
             PremiumTab.PERF -> PremiumPerformance(
                 settings = settings,
@@ -85,7 +79,7 @@ fun PremiumApp(prefs: UserPreferences) {
                     }
                 }
             )
-            PremiumTab.SHOPPING -> PremiumShopping(settings, Modifier.padding(pad))
+            PremiumTab.SHOPPING -> UltraShoppingScreen(Modifier.padding(pad))
         }
     }
 }
