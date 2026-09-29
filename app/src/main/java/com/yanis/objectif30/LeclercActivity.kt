@@ -354,6 +354,50 @@ fun WildCartLeclercScreen(
         else BudgetProductMatcher.recommend(activeNeed, products)
     }
 
+    if (showBrowser) {
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .statusBarsPadding()
+                .navigationBarsPadding()
+        ) {
+            Surface(
+                tonalElevation = 3.dp
+            ) {
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(horizontal = 12.dp, vertical = 8.dp),
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.SpaceBetween
+                ) {
+                    Column(Modifier.weight(1f)) {
+                        Text(
+                            "E.Leclerc Drive • Istres",
+                            fontWeight = FontWeight.Black
+                        )
+                        Text(
+                            "Navigation plein écran",
+                            style = MaterialTheme.typography.bodySmall,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                        )
+                    }
+                    TextButton(onClick = { showBrowser = false }) {
+                        Text("Retour WildCart")
+                    }
+                }
+            }
+
+            AndroidView(
+                factory = { webView },
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .weight(1f)
+            )
+        }
+        return
+    }
+
     LazyColumn(
         modifier = Modifier.fillMaxSize(),
         contentPadding = PaddingValues(14.dp),
@@ -407,23 +451,17 @@ fun WildCartLeclercScreen(
         }
 
         item {
-            OutlinedButton(
-                onClick = { showBrowser = !showBrowser },
+            Button(
+                onClick = { showBrowser = true },
                 modifier = Modifier.fillMaxWidth()
             ) {
-                Text(if (showBrowser) "Masquer la page E.Leclerc" else "Afficher la page E.Leclerc")
+                Text("↗ Ouvrir E.Leclerc en plein écran")
             }
-        }
-
-        item {
-            Card(shape = RoundedCornerShape(20.dp)) {
-                AndroidView(
-                    factory = { webView },
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .height(if (showBrowser) 430.dp else 1.dp)
-                )
-            }
+            Text(
+                "La page officielle s'ouvre seule, sans être imbriquée dans la liste Wildsport : tu peux faire défiler normalement tout le catalogue.",
+                style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant
+            )
         }
 
         if (ingredients.isNotEmpty()) {
