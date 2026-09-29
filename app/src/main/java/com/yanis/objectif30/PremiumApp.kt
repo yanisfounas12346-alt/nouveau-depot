@@ -105,6 +105,7 @@ private fun premiumMeals(settings: UserSettings): List<MealOption> =
 
 @Composable
 fun PremiumToday(settings: UserSettings, modifier: Modifier = Modifier) {
+    val context = LocalContext.current
     val plan = PlanRepository.day(premiumTodayIndex())
     val meals = premiumMeals(settings)
     val timing = NutritionRepository.timing(settings.trainingHour, settings.trainingMinute)
@@ -149,6 +150,29 @@ fun PremiumToday(settings: UserSettings, modifier: Modifier = Modifier) {
                             "Zone stable : garde la structure et juge la tendance sur plusieurs semaines."
                     }
                     Text(advice, color = MaterialTheme.colorScheme.secondary)
+                }
+            }
+        }
+
+        item {
+            ElevatedCard(shape = RoundedCornerShape(22.dp)) {
+                Column(Modifier.padding(16.dp)) {
+                    Text(
+                        "🏃 Wildsport Run",
+                        style = MaterialTheme.typography.titleLarge,
+                        fontWeight = FontWeight.Black,
+                        color = MaterialTheme.colorScheme.primary
+                    )
+                    Text("GPS en direct • vitesse • distance • pas • coaching vocal")
+                    Spacer(Modifier.height(10.dp))
+                    Button(
+                        onClick = {
+                            context.startActivity(Intent(context, RunTrackerActivity::class.java))
+                        },
+                        modifier = Modifier.fillMaxWidth()
+                    ) {
+                        Text("▶ Lancer ma course")
+                    }
                 }
             }
         }
