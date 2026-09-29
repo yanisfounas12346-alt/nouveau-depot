@@ -15,17 +15,17 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 
-val WildCyan = Color(0xFF22E7F4)
-val WildBlue = Color(0xFF3385FF)
-val WildViolet = Color(0xFF8C7CFF)
-val WildGreen = Color(0xFF60E6A8)
-val WildAmber = Color(0xFFFFC85C)
-val WildRed = Color(0xFFFF7588)
-val WildInk = Color(0xFF05080D)
-val WildPanel = Color(0xFF0B1118)
-val WildPanel2 = Color(0xFF101923)
-val WildLine = Color(0xFF223443)
-val WildMuted = Color(0xFF8FA6B2)
+val WildCyan = Color(0xFF55F2FF)
+val WildBlue = Color(0xFF6AACFF)
+val WildViolet = Color(0xFFAE9CFF)
+val WildGreen = Color(0xFF78F0B8)
+val WildAmber = Color(0xFFFFD477)
+val WildRed = Color(0xFFFF8797)
+val WildInk = Color(0xFF071018)
+val WildPanel = Color(0xFF111C26)
+val WildPanel2 = Color(0xFF182734)
+val WildLine = Color(0xFF3D5A6A)
+val WildMuted = Color(0xFFC1D0D7)
 
 @Composable
 fun WildBackdrop(
@@ -37,8 +37,8 @@ fun WildBackdrop(
             .fillMaxSize()
             .background(
                 Brush.verticalGradient(
-                    0f to Color(0xFF061017),
-                    0.35f to Color(0xFF071018),
+                    0f to Color(0xFF0A1822),
+                    0.35f to Color(0xFF09141D),
                     1f to WildInk
                 )
             )
@@ -70,11 +70,11 @@ fun WildGlassCard(
     Surface(
         modifier = modifier,
         shape = RoundedCornerShape(24.dp),
-        color = if (highlighted) Color(0xFF0D222A) else WildPanel.copy(alpha = 0.96f),
+        color = if (highlighted) Color(0xFF12313B) else WildPanel,
         contentColor = MaterialTheme.colorScheme.onSurface,
         border = BorderStroke(
             1.dp,
-            if (highlighted) WildCyan.copy(alpha = 0.55f) else WildLine.copy(alpha = 0.9f)
+            if (highlighted) WildCyan.copy(alpha = 0.78f) else WildLine
         ),
         tonalElevation = if (highlighted) 3.dp else 0.dp
     ) {
