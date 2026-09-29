@@ -17,6 +17,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
@@ -65,6 +66,7 @@ fun WildCartLeclercScreen(
     var autoSelectIstresDone by remember { mutableStateOf(false) }
     var status by remember { mutableStateOf("Drive préféré : Istres. Wildsport ouvre directement la page officielle d’Istres.") }
     var query by remember { mutableStateOf("") }
+    var activeNeed by remember { mutableStateOf("") }
     var products by remember { mutableStateOf<List<LeclercProduct>>(emptyList()) }
     var busy by remember { mutableStateOf(false) }
     var cartMessage by remember { mutableStateOf("") }
@@ -149,8 +151,9 @@ fun WildCartLeclercScreen(
         }
     }
 
-    fun runSearch(searchText: String) {
+    fun runSearch(searchText: String, needText: String = searchText) {
         if (searchText.isBlank() || busy) return
+        activeNeed = needText
         busy = true
         cartMessage = ""
         val quoted = JSONObject.quote(searchText.trim())
@@ -456,7 +459,7 @@ fun WildCartLeclercScreen(
                         TextButton(
                             onClick = {
                                 query = normalized.ifBlank { ingredient }
-                                runSearch(query)
+                                runSearch(query, ingredient)
                             }
                         ) {
                             Text("Rechercher")
@@ -479,7 +482,7 @@ fun WildCartLeclercScreen(
 
         item {
             Button(
-                onClick = { runSearch(query) },
+                onClick = { runSearch(query, query) },
                 enabled = !busy && query.isNotBlank(),
                 modifier = Modifier.fillMaxWidth()
             ) {
@@ -495,10 +498,88 @@ fun WildCartLeclercScreen(
             }
         }
 
+        val recommendation = remember(products, activeNeed) {
+            if (activeNeed.isBlank()) null
+            else BudgetProductMatcher.recommend(activeNeed, products)
+        }
+
+        if (recommendation != null) {
+            item {
+                ElevatedCard(
+                    shape = RoundedCornerShape(22.dp),
+                    colors = CardDefaults.elevatedCardColors(
+                        containerColor = MaterialTheme.colorScheme.primaryContainer
+                    )
+                ) {
+                    Column(Modifier.padding(16.dp)) {
+                        Text(
+                            "💸 ACHAT RECOMMANDÉ",
+                            color = MaterialTheme.colorScheme.primary,
+                            fontWeight = FontWeight.Black
+                        )
+                        Text(
+                            recommendation.product.label,
+                            style = MaterialTheme.typography.titleLarge,
+                            fontWeight = FontWeight.Black
+                        )
+                        Spacer(Modifier.height(6.dp))
+                        Text(
+                            "Besoin : " + activeNeed,
+                            fontWeight = FontWeight.SemiBold
+                        )
+                        Text(
+                            "À prendre : " + recommendation.packs + " paquet(s) • " +
+                                "total ≈ " + "%.2f €".format(recommendation.totalCost)
+                        )
+                        val bought = BudgetProductMatcher.formatAmount(
+                            recommendation.purchasedAmount,
+                            recommendation.unit
+                        )
+                        val waste = BudgetProductMatcher.formatAmount(
+                            recommendation.wasteAmount,
+                            recommendation.unit
+                        )
+                        Text(
+                            "Quantité achetée : " + bought + " • surplus estimé : " + waste,
+                            style = MaterialTheme.typography.bodySmall
+                        )
+                        if (recommendation.product.pricePerUnit.isNotBlank()) {
+                            Text(
+                                recommendation.product.pricePerUnit,
+                                style = MaterialTheme.typography.bodySmall,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant
+                            )
+                        }
+                        Spacer(Modifier.height(10.dp))
+                        Button(
+                            onClick = {
+                                addToCart(
+                                    recommendation.product,
+                                    recommendation.packs
+                                )
+                            },
+                            enabled = !busy,
+                            modifier = Modifier.fillMaxWidth()
+                        ) {
+                            Text(
+                                "Ajouter exactement " +
+                                    recommendation.packs + " au panier"
+                            )
+                        }
+                        Spacer(Modifier.height(6.dp))
+                        Text(
+                            "Wildsport choisit le produit qui couvre la quantité nécessaire au coût total le plus bas parmi les résultats disponibles, puis pénalise le gaspillage inutile.",
+                            style = MaterialTheme.typography.bodySmall
+                        )
+                    }
+                }
+            }
+        }
+
         if (products.isNotEmpty()) {
             item {
                 Text(
-                    "Résultats E.Leclerc • " + products.size,
+                    "Autres résultats E.Leclerc • " + products.size,
                     style = MaterialTheme.typography.titleLarge,
                     fontWeight = FontWeight.Black
                 )
