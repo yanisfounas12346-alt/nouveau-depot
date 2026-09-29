@@ -350,7 +350,9 @@ private fun aggregateWeekIngredients(rawIngredients: List<String>): List<Shoppin
             var amount = match.groupValues[1].replace(',', '.').toDoubleOrNull() ?: 0.0
             var unit = match.groupValues[2].lowercase()
             val name = match.groupValues[3].trim()
-            if (unit == "kg") {
+            if (unit.isBlank()) {
+                unit = "p"
+            } else if (unit == "kg") {
                 amount *= 1000.0
                 unit = "g"
             } else if (unit == "l") {
@@ -393,6 +395,7 @@ private fun aggregateWeekIngredients(rawIngredients: List<String>): List<Shoppin
                     acc.amount.roundToInt().toString() + " ml " + acc.name
                 }
             }
+            "p" -> acc.amount.roundToInt().toString() + " " + acc.name
             "" -> {
                 if (acc.count > 1) acc.count.toString() + " × " + acc.name else acc.name
             }
