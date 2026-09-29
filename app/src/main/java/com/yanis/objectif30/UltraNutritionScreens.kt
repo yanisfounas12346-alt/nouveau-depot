@@ -66,7 +66,7 @@ fun UltraNutritionScreen(
                     fontWeight = FontWeight.Black
                 )
                 Text(
-                    "24 recettes disponibles • 28 repas planifiés sur 7 jours",
+                    WeeklyNutritionRepository.recipeCount().toString() + " recettes disponibles • 28 repas planifiés sur 7 jours",
                     color = MaterialTheme.colorScheme.primary,
                     fontWeight = FontWeight.Bold
                 )
@@ -77,7 +77,7 @@ fun UltraNutritionScreen(
                     style = MaterialTheme.typography.titleMedium
                 )
                 Text(
-                    "Les valeurs sont des repères pratiques. L’objectif est une alimentation rassasiante et compatible avec tes séances, pas de manger au gramme près.",
+                    "Mode ÉCO actif : le menu par défaut réutilise les mêmes produits de base sur plusieurs recettes pour limiter le nombre d’achats et le gaspillage. Les valeurs restent des repères pratiques.",
                     style = MaterialTheme.typography.bodySmall,
                     color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
@@ -249,9 +249,9 @@ fun UltraShoppingScreen(
         item {
             ElevatedCard(shape = RoundedCornerShape(20.dp)) {
                 Column(Modifier.padding(16.dp)) {
-                    Text("🛒 WildCart hebdomadaire", fontWeight = FontWeight.Bold)
+                    Text("🛒 WildCart hebdomadaire • mode éco", fontWeight = FontWeight.Bold)
                     Text(
-                        "Tu peux cocher ce que tu as déjà à la maison. WildCart enverra uniquement ce qu’il reste à acheter vers E.Leclerc Istres."
+                        "La semaine économique est construite autour d’un petit noyau d’aliments réutilisés. Coche ce que tu as déjà : WildCart n’enverra que ce qu’il reste à acheter vers E.Leclerc Istres."
                     )
                     Spacer(Modifier.height(10.dp))
                     Button(
