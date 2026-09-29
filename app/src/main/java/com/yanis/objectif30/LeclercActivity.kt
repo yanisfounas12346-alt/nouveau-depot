@@ -349,6 +349,11 @@ fun WildCartLeclercScreen(
         }
     }
 
+    val recommendation = remember(products, activeNeed) {
+        if (activeNeed.isBlank()) null
+        else BudgetProductMatcher.recommend(activeNeed, products)
+    }
+
     LazyColumn(
         modifier = Modifier.fillMaxSize(),
         contentPadding = PaddingValues(14.dp),
@@ -496,11 +501,6 @@ fun WildCartLeclercScreen(
                     Text(cartMessage, modifier = Modifier.padding(16.dp))
                 }
             }
-        }
-
-        val recommendation = remember(products, activeNeed) {
-            if (activeNeed.isBlank()) null
-            else BudgetProductMatcher.recommend(activeNeed, products)
         }
 
         if (recommendation != null) {
