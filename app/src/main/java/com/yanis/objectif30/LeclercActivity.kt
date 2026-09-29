@@ -3,6 +3,7 @@ package com.yanis.objectif30
 import android.annotation.SuppressLint
 import android.os.Bundle
 import android.webkit.CookieManager
+import android.webkit.WebChromeClient
 import android.webkit.WebView
 import android.webkit.WebViewClient
 import androidx.activity.ComponentActivity
@@ -60,7 +61,8 @@ fun WildCartLeclercScreen(
 ) {
     val context = LocalContext.current
     var currentUrl by remember { mutableStateOf("") }
-    var status by remember { mutableStateOf("Étape 1 : sélectionne ton Drive. Étape 2 : connecte-toi à ton compte E.Leclerc.") }
+    var autoSelectIstresDone by remember { mutableStateOf(false) }
+    var status by remember { mutableStateOf("Drive préféré : Istres. Wildsport ouvre directement la page officielle d’Istres.") }
     var query by remember { mutableStateOf("") }
     var products by remember { mutableStateOf<List<LeclercProduct>>(emptyList()) }
     var busy by remember { mutableStateOf(false) }
@@ -71,27 +73,56 @@ fun WildCartLeclercScreen(
             settings.javaScriptEnabled = true
             settings.domStorageEnabled = true
             settings.databaseEnabled = true
+            settings.javaScriptCanOpenWindowsAutomatically = true
+            settings.setSupportMultipleWindows(false)
             settings.allowFileAccess = false
             settings.allowContentAccess = false
             CookieManager.getInstance().setAcceptCookie(true)
             CookieManager.getInstance().setAcceptThirdPartyCookies(this, true)
             WebView.setWebContentsDebuggingEnabled(false)
+            webChromeClient = WebChromeClient()
 
             webViewClient = object : WebViewClient() {
                 override fun onPageFinished(view: WebView?, url: String?) {
                     currentUrl = url.orEmpty()
+                    CookieManager.getInstance().flush()
+
+                    val istresLanding = currentUrl.contains("drive-istres.aspx", ignoreCase = true)
+                    if (istresLanding && !autoSelectIstresDone) {
+                        autoSelectIstresDone = true
+                        view?.evaluateJavascript(
+                            """
+                            (() => {
+                              const nodes = Array.from(document.querySelectorAll('a,button,input[type="button"],input[type="submit"]'));
+                              const target = nodes.find(el => {
+                                const txt = (el.innerText || el.value || el.textContent || '').trim().toLowerCase();
+                                return txt.includes('choisir ce drive') || txt.includes('commencer mes courses');
+                              });
+                              if (target) { target.click(); return 'clicked'; }
+                              return 'not-found';
+                            })();
+                            """.trimIndent(),
+                            null
+                        )
+                    }
+
                     status = when {
                         currentUrl.contains("-courses.leclercdrive.fr") &&
                             Regex("magasin-\\d{6}-\\d{6}").containsMatchIn(currentUrl) ->
-                            "✅ Drive détecté. Tu peux maintenant te connecter à ton compte E.Leclerc dans cette page."
+                            "✅ Drive Istres sélectionné. Appuie maintenant sur « Se connecter » dans la page E.Leclerc."
+                        istresLanding ->
+                            "Istres est chargé. Wildsport sélectionne automatiquement ce Drive."
+                        currentUrl.contains("auth", ignoreCase = true) ||
+                            currentUrl.contains("connexion", ignoreCase = true) ->
+                            "Connexion E.Leclerc en cours…"
                         currentUrl.contains("leclerc", ignoreCase = true) ->
-                            "Choisis d’abord ton Drive (ville/code postal), puis appuie sur Se connecter."
+                            "Wildsport reste configuré sur le Drive d’Istres."
                         else ->
-                            "Ouvre E.Leclerc Drive dans cette fenêtre."
+                            "Navigation E.Leclerc en cours."
                     }
                 }
             }
-            loadUrl("https://www.leclercdrive.fr/mobile/")
+            loadUrl("https://www.leclercdrive.fr/mobile/region-provence-alpes-cote-dazur/marseille/drive-istres.aspx")
         }
     }
 
@@ -341,13 +372,23 @@ fun WildCartLeclercScreen(
                 shape = RoundedCornerShape(20.dp)
             ) {
                 Column(Modifier.padding(16.dp)) {
-                    Text("Connexion privée", fontWeight = FontWeight.Bold)
+                    Text("Connexion privée • Istres", fontWeight = FontWeight.Bold)
                     Text(status)
                     Spacer(Modifier.height(6.dp))
                     Text(
-                        "Wildsport ne te demande pas ton mot de passe. Tu te connectes directement dans la page officielle E.Leclerc ci-dessous.",
+                        "J’ai verrouillé WildCart sur E.Leclerc DRIVE Istres. Tes identifiants restent saisis uniquement dans la page officielle E.Leclerc.",
                         style = MaterialTheme.typography.bodySmall
                     )
+                    Spacer(Modifier.height(10.dp))
+                    OutlinedButton(
+                        onClick = {
+                            autoSelectIstresDone = false
+                            webView.loadUrl("https://www.leclercdrive.fr/mobile/region-provence-alpes-cote-dazur/marseille/drive-istres.aspx")
+                        },
+                        modifier = Modifier.fillMaxWidth()
+                    ) {
+                        Text("↻ Recharger mon Drive Istres")
+                    }
                 }
             }
         }
@@ -358,7 +399,7 @@ fun WildCartLeclercScreen(
                     factory = { webView },
                     modifier = Modifier
                         .fillMaxWidth()
-                        .height(430.dp)
+                        .height(560.dp)
                 )
             }
         }
