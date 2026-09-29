@@ -63,31 +63,36 @@ fun WildsportUltraApp(prefs: UserPreferences) {
                             selected = tab == WildTab.HOME,
                             onClick = { tab = WildTab.HOME },
                             icon = { Icon(Icons.Rounded.Home, null) },
-                            label = { Text("Accueil") }
+                            label = { Text("Accueil") },
+                            alwaysShowLabel = false
                         )
                         NavigationBarItem(
                             selected = tab == WildTab.WEEK,
                             onClick = { tab = WildTab.WEEK },
                             icon = { Icon(Icons.Rounded.CalendarMonth, null) },
-                            label = { Text("Semaine") }
+                            label = { Text("Semaine") },
+                            alwaysShowLabel = false
                         )
                         NavigationBarItem(
                             selected = tab == WildTab.FOOD,
                             onClick = { tab = WildTab.FOOD },
                             icon = { Icon(Icons.Rounded.RestaurantMenu, null) },
-                            label = { Text("Repas") }
+                            label = { Text("Repas") },
+                            alwaysShowLabel = false
                         )
                         NavigationBarItem(
                             selected = tab == WildTab.PERF,
                             onClick = { tab = WildTab.PERF },
                             icon = { Icon(Icons.Rounded.QueryStats, null) },
-                            label = { Text("Perf") }
+                            label = { Text("Perf") },
+                            alwaysShowLabel = false
                         )
                         NavigationBarItem(
                             selected = tab == WildTab.SHOP,
                             onClick = { tab = WildTab.SHOP },
                             icon = { Icon(Icons.Rounded.ShoppingCart, null) },
-                            label = { Text("Courses") }
+                            label = { Text("Courses") },
+                            alwaysShowLabel = false
                         )
                     }
                 }
