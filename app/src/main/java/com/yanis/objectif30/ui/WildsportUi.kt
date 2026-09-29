@@ -7,6 +7,7 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -57,7 +58,11 @@ fun WildBackdrop(
                     )
                 )
         )
-        content()
+        CompositionLocalProvider(
+            LocalContentColor provides Color.White
+        ) {
+            content()
+        }
     }
 }
 
@@ -197,8 +202,10 @@ fun WildPrimaryButton(
         modifier = modifier.heightIn(min = 54.dp),
         shape = RoundedCornerShape(18.dp),
         colors = ButtonDefaults.buttonColors(
-            containerColor = WildCyan,
-            contentColor = Color(0xFF001317)
+            containerColor = WildBlue,
+            contentColor = Color.White,
+            disabledContainerColor = WildPanel2,
+            disabledContentColor = WildMuted
         )
     ) {
         Text(text, fontWeight = FontWeight.Black)
